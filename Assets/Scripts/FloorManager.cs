@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class FloorManager : MonoBehaviour
+public class FloorManager : NetworkBehaviour
 {
     private MeshRenderer floorRenderer;
+    private bool active = false;
+    public string playerName;
 
     void Start()
     {
@@ -13,22 +16,39 @@ public class FloorManager : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && active)
         {
-            Debug.Log("collided with player");
-            // Get the MeshRenderer component of the player object
+            //Debug.Log("collided with player");
             MeshRenderer playerRenderer = other.GetComponent<MeshRenderer>();
+            string player = other.GetComponent<PlayerManager>().playerName;
 
-            // Check if the player's MeshRenderer component is not null
+            Debug.Log($"Player {player} has the cube");
+
             if (playerRenderer != null)
             {
-                // Assign the player's material to the floor's MeshRenderer
-                floorRenderer.material = playerRenderer.material;
+                ColorFloorRpc(playerRenderer.material.color, player);
             }
             else
             {
                 Debug.LogWarning("Player object does not have a MeshRenderer component.");
             }
         }
+    }
+
+    public void ActivateFloor()
+    {
+        active = true;
+    }
+
+    public void DeActivateFloor()
+    {
+        active = false;
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void ColorFloorRpc(Color color, string player)
+    {
+        floorRenderer.material.color = color;
+        playerName = player;
     }
 }
