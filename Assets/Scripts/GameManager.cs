@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using TMPro;
+using UnityEngine.UI;
 using System;
 
 public class GameManager : NetworkBehaviour
@@ -12,11 +13,19 @@ public class GameManager : NetworkBehaviour
 
     NetworkManager networkManager;
     int playersReady;
-    GameObject gameSetup;
+    GameObject networkSelect;
+    GameObject waitingForPlayer;
+    GameObject colorSelectActive;
+    GameObject colorSelectInactive;
     GameObject gameCountdown;
     GameObject gameOverlay;
-    GameObject waitingForPlayer;
     GameObject endScrean;
+    Button redButton;
+    Button blueButton;
+    Button greenButton;
+    Button yelowButton;
+    Button magentaButton;
+    Button cyanButton;
     TMP_Text gameStartCountdown;
     TMP_Text gameTimer;
     TMP_Text resultText;
@@ -26,39 +35,67 @@ public class GameManager : NetworkBehaviour
     float countdownTimeRemaining;
     float timerTimeRemaining;
     private Dictionary<string, int> playerScores = new Dictionary<string, int>();
+    public List<Color> playerColors = new List<Color>();
 
     private void Start()
     {
         networkManager = FindObjectOfType<NetworkManager>();
         playersReady = 0;
-        gameSetup = GameObject.Find("GameSetup");
+        networkSelect = GameObject.Find("NetworkSelect");
+        waitingForPlayer = GameObject.Find("WaitingForPlayer");
+        colorSelectActive = GameObject.Find("ColorSelectActive");
+        colorSelectInactive = GameObject.Find("ColorSelectInactive");
         gameCountdown = GameObject.Find("GameCountDown");
         gameOverlay = GameObject.Find("GameOverlay");
-        waitingForPlayer = GameObject.Find("WaitingForPlayer");
         endScrean = GameObject.Find("EndScrean");
+        redButton = GameObject.Find("RedButton").GetComponent<Button>();
+        blueButton = GameObject.Find("BlueButton").GetComponent<Button>();
+        greenButton = GameObject.Find("GreenButton").GetComponent<Button>();
+        yelowButton = GameObject.Find("YelowButton").GetComponent<Button>();
+        magentaButton = GameObject.Find("MagentaButton").GetComponent<Button>();
+        cyanButton = GameObject.Find("CyanButton").GetComponent<Button>();
+        redButton.onClick.AddListener(delegate { setColor(Color.red); });
+        blueButton.onClick.AddListener(delegate { setColor(Color.blue); });
+        greenButton.onClick.AddListener(delegate { setColor(Color.green); });
+        yelowButton.onClick.AddListener(delegate { setColor(Color.yellow); });
+        magentaButton.onClick.AddListener(delegate { setColor(Color.magenta); });
+        cyanButton.onClick.AddListener(delegate { setColor(Color.cyan); });
         gameStartCountdown = GameObject.Find("GameStartCountdown").GetComponent<TMP_Text>();
         gameTimer = GameObject.Find("GameCountdown").GetComponent<TMP_Text>();
         resultText = GameObject.Find("ResultText").GetComponent<TMP_Text>();
         scoreText = GameObject.Find("ScoreText").GetComponent<TMP_Text>();
+        waitingForPlayer.SetActive(false);
+        colorSelectActive.SetActive(false);
+        colorSelectInactive.SetActive(false);
         gameCountdown.SetActive(false);
         gameOverlay.SetActive(false);
-        waitingForPlayer.SetActive(false);
         endScrean.SetActive(false);
         gameCountdownState = false;
         gameRunningState = false;
         countdownTimeRemaining = COUNTDOWN_DURATION;
         timerTimeRemaining = TIMER_DURATION;
-        if (networkManager.IsHost)
-        {
-            networkManager.OnClientConnectedCallback += OnPlayerConnected;
-        }
-        
+        networkManager.OnClientConnectedCallback += OnPlayerConnected;       
     }
 
     private void OnPlayerConnected(ulong obj)
     {
         Debug.Log("Player connected: " + obj);
 
+        if (waitingForPlayer)
+        {
+            networkSelect.SetActive(false);
+            waitingForPlayer.SetActive(true);
+        }
+        if (obj == 1 && networkManager.IsHost)
+        {
+            StartSetupRpc();
+        }
+
+    }
+
+    public void setColor(Color color)
+    {
+        CheckForColorRpc(color, networkManager.LocalClientId);
     }
 
     private void Update()
@@ -261,24 +298,45 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     void StartSetupRpc()
     {
+        waitingForPlayer.SetActive(false);
+        colorSelectActive.SetActive(true);
+    }
+
+    [Rpc(SendTo.Server)]
+    void CheckForColorRpc(Color color, ulong ClientId)
+    {
+        if (playerColors.Contains(color))
+        {
+
+        }
+        else
+        {
+            playerColors.Add(color);
+            ColorConfirmRpc(color, RpcTarget.Single(ClientId, RpcTargetUse.Temp));
+        }
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    void ColorConfirmRpc(Color color, RpcParams rpcParams = default)
+    {
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
         foreach (GameObject player in players)
         {
-            PlayerManager playerManager = player.GetComponent<PlayerManager>();
-
-            if (playerManager != null)
+            if (player.GetComponent<NetworkObject>().IsOwner)
             {
-                playerManager.DisableMovemant();
+                player.GetComponent<PlayerManager>().SetColor(color);
             }
         }
-    }
 
+        colorSelectActive.SetActive(false);
+        colorSelectInactive.SetActive(true);
+    }
 
     [Rpc(SendTo.Everyone)]
     void StartCountdownRpc()
     {
-        gameSetup.SetActive(false);
+        colorSelectInactive.SetActive(false);
         gameCountdown.SetActive(true);
         gameCountdownState = true;
     }

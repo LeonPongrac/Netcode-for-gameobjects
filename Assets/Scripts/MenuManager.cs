@@ -15,7 +15,6 @@ public class MenuManager : MonoBehaviour
     {
         Debug.Log("Starting as Host");
 
-        // Start as the host
         networkManager.StartHost();
     }
 
@@ -23,7 +22,6 @@ public class MenuManager : MonoBehaviour
     {
         Debug.Log("Starting as Client");
 
-        // Start as the client
         networkManager.StartClient();
     }
 }
