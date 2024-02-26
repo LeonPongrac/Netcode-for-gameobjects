@@ -8,10 +8,11 @@ public class FloorManager : NetworkBehaviour
     private MeshRenderer floorRenderer;
     private bool active = false;
     public string playerName;
-
+    Color defaultColor;
     void Start()
     {
         floorRenderer = GetComponent<MeshRenderer>();
+        defaultColor = floorRenderer.material.color;
     }
 
     void OnTriggerEnter(Collider other)
@@ -43,6 +44,12 @@ public class FloorManager : NetworkBehaviour
     public void DeActivateFloor()
     {
         active = false;
+    }
+
+    public void ResetColor()
+    {
+        floorRenderer.material.color = defaultColor;
+        playerName = "";
     }
 
     [Rpc(SendTo.Everyone)]

@@ -78,6 +78,18 @@ public class PlayerManager : NetworkBehaviour
         transform.Translate(moveDirection * moveSpeed * Time.deltaTime);
     }
 
+    public void ResetPosition()
+    {
+        if (IsOwner && networkManager.IsHost)
+        {
+            transform.SetPositionAndRotation(spawnPoint1, new Quaternion());
+        }
+        else if (IsOwner && networkManager.IsClient)
+        {
+            transform.SetPositionAndRotation(spawnPoint2, new Quaternion());
+        }
+    }
+
     public void EnableMovemant()
     {
         canMove = true;

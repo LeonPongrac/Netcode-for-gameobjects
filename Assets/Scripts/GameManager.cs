@@ -26,6 +26,7 @@ public class GameManager : NetworkBehaviour
     Button yelowButton;
     Button magentaButton;
     Button cyanButton;
+    Button resetButton;
     TMP_Text gameStartCountdown;
     TMP_Text gameTimer;
     TMP_Text resultText;
@@ -54,12 +55,14 @@ public class GameManager : NetworkBehaviour
         yelowButton = GameObject.Find("YelowButton").GetComponent<Button>();
         magentaButton = GameObject.Find("MagentaButton").GetComponent<Button>();
         cyanButton = GameObject.Find("CyanButton").GetComponent<Button>();
+        resetButton = GameObject.Find("RestartButton").GetComponent<Button>();
         redButton.onClick.AddListener(delegate { setColor(Color.red); });
         blueButton.onClick.AddListener(delegate { setColor(Color.blue); });
         greenButton.onClick.AddListener(delegate { setColor(Color.green); });
         yelowButton.onClick.AddListener(delegate { setColor(Color.yellow); });
         magentaButton.onClick.AddListener(delegate { setColor(Color.magenta); });
         cyanButton.onClick.AddListener(delegate { setColor(Color.cyan); });
+        resetButton.onClick.AddListener(delegate { ResetGameRpc(); });
         gameStartCountdown = GameObject.Find("GameStartCountdown").GetComponent<TMP_Text>();
         gameTimer = GameObject.Find("GameCountdown").GetComponent<TMP_Text>();
         resultText = GameObject.Find("ResultText").GetComponent<TMP_Text>();
@@ -102,6 +105,7 @@ public class GameManager : NetworkBehaviour
     {
         if (gameCountdownState)
         {
+            colorSelectInactive.SetActive(false);
             countdownTimeRemaining -= Time.deltaTime;
             if (countdownTimeRemaining <= 0f)
             {
@@ -295,6 +299,36 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    void ResetPlayerPosition()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (GameObject player in players)
+        {
+            PlayerManager playerManager = player.GetComponent<PlayerManager>();
+
+            if (playerManager != null)
+            {
+                playerManager.ResetPosition();
+            }
+        }
+    }
+
+    void ResetFloor()
+    {
+        GameObject[] floors = GameObject.FindGameObjectsWithTag("Floor");
+
+        foreach (GameObject floor in floors)
+        {
+            FloorManager floorManager = floor.GetComponent<FloorManager>();
+
+            if (floorManager != null)
+            {
+                floorManager.ResetColor();
+            }
+        }
+    }
+
     [Rpc(SendTo.Everyone)]
     void StartSetupRpc()
     {
@@ -357,5 +391,21 @@ public class GameManager : NetworkBehaviour
         gameOverlay.SetActive(false);
         deactivateFloor();
         DisablePlayerMovement();
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void ResetGameRpc()
+    {
+        endScrean.SetActive(false);
+        ResetPlayerPosition();
+        ResetFloor();
+        countdownTimeRemaining = COUNTDOWN_DURATION;
+        timerTimeRemaining = TIMER_DURATION;
+        playerScores.Clear();
+        if (networkManager.IsHost)
+        {
+            Debug.Log($"Starting game");
+            StartCountdownRpc();
+        }
     }
 }
