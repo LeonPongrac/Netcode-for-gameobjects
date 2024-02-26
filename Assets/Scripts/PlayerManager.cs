@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerManager : NetworkBehaviour
 {
@@ -32,30 +29,26 @@ public class PlayerManager : NetworkBehaviour
 
     private void Start()
     {
+        playerMeshRenderer = this.GetComponent<MeshRenderer>();
 
-        if (IsOwner)
-        {
-            playerMeshRenderer = this.GetComponent<MeshRenderer>();
-        }
-        else
-        {
-            playerMeshRenderer = this.GetComponent<MeshRenderer>();
-        }
-
+        //If the you are the owner and the host, sets the player to spawnPoint1 and names the player to Host
         if (IsOwner && networkManager.IsHost)
         {
             transform.SetPositionAndRotation(spawnPoint1, new Quaternion());
             playerName = "Host";
         }
+        //If the you are the owner and the client, sets the player to spawnPoint2 and names the player to Client
         else if (IsOwner && networkManager.IsClient)
         {
             transform.SetPositionAndRotation(spawnPoint2, new Quaternion());
             playerName = "Client";
         }
+        //If the you are the host, names the player to Client
         else if (networkManager.IsHost)
         {
             playerName = "Client";
         }
+        //If the you are the client, names the player to Host
         else if (networkManager.IsClient)
         {
             playerName = "Host";
@@ -108,7 +101,9 @@ public class PlayerManager : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     void ChangeCollorRpc(Color color)
     {
+        //Change the color of the player to the given color
         playerMeshRenderer.material.SetColor("_Color", color);
+        //Tell gameManager that the player is ready
         gameManager.playerReady();
     }
 

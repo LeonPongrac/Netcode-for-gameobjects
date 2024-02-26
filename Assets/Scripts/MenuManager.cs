@@ -1,7 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
 using Unity.Netcode;
-using System;
 
 public class MenuManager : MonoBehaviour
 {
@@ -13,15 +11,20 @@ public class MenuManager : MonoBehaviour
 
     public void StartHost()
     {
-        Debug.Log("Starting as Host");
-
+        //Debug.Log("Starting as Host");
+        //Start host through networkManager
         networkManager.StartHost();
     }
 
     public void StartClient()
     {
-        Debug.Log("Starting as Client");
-
+        //Debug.Log("Starting as Client");
+        //Start client through networkManager
         networkManager.StartClient();
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

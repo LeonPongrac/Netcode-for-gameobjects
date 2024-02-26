@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
@@ -23,15 +21,11 @@ public class FloorManager : NetworkBehaviour
             MeshRenderer playerRenderer = other.GetComponent<MeshRenderer>();
             string player = other.GetComponent<PlayerManager>().playerName;
 
-            Debug.Log($"Player {player} has the cube");
+            //Debug.Log($"Player {player} has the cube");
 
             if (playerRenderer != null)
             {
                 ColorFloorRpc(playerRenderer.material.color, player);
-            }
-            else
-            {
-                Debug.LogWarning("Player object does not have a MeshRenderer component.");
             }
         }
     }
@@ -55,7 +49,9 @@ public class FloorManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     void ColorFloorRpc(Color color, string player)
     {
+        //Set the color of floor to the color of the player
         floorRenderer.material.color = color;
+        //Set the playerName to the player that touched the floor
         playerName = player;
     }
 }

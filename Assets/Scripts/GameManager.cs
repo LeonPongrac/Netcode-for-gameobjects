@@ -1,10 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 using UnityEngine.UI;
-using System;
 
 public class GameManager : NetworkBehaviour
 {
@@ -243,10 +241,6 @@ public class GameManager : NetworkBehaviour
             {
                 floorManager.ActivateFloor();
             }
-            else
-            {
-                Debug.LogWarning("FloorManager component not found on GameObject with tag 'floor'");
-            }
         }
     }
 
@@ -261,10 +255,6 @@ public class GameManager : NetworkBehaviour
             if (floorManager != null)
             {
                 floorManager.DeActivateFloor();
-            }
-            else
-            {
-                Debug.LogWarning("FloorManager component not found on GameObject with tag 'floor'");
             }
         }
     }
@@ -329,30 +319,35 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    //All entities should activate this function
     [Rpc(SendTo.Everyone)]
     void StartSetupRpc()
     {
+        //deactivate waitingForPlayer GameObject
         waitingForPlayer.SetActive(false);
+        //activate colorSelectActive GameObject
         colorSelectActive.SetActive(true);
     }
 
+    //Only the Server can run this function
     [Rpc(SendTo.Server)]
     void CheckForColorRpc(Color color, ulong ClientId)
     {
-        if (playerColors.Contains(color))
+        //activate if the playerColors doesent contain the selected color
+        if (!playerColors.Contains(color))
         {
-
-        }
-        else
-        {
+            //add the color to the playerColors
             playerColors.Add(color);
+            //tell the client that called the function that the selected color is confirmed
             ColorConfirmRpc(color, RpcTarget.Single(ClientId, RpcTargetUse.Temp));
         }
     }
 
+    //Only the entity specified in params can run this function
     [Rpc(SendTo.SpecifiedInParams)]
     void ColorConfirmRpc(Color color, RpcParams rpcParams = default)
     {
+        //find the player that is owned by the client and set its color to the selected color
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
         foreach (GameObject player in players)
@@ -363,45 +358,69 @@ public class GameManager : NetworkBehaviour
             }
         }
 
+        //deactivate colorSelectActive GameObject
         colorSelectActive.SetActive(false);
+        //activate colorSelectInactive GameObject
         colorSelectInactive.SetActive(true);
     }
 
+    //All entities should activate this function
     [Rpc(SendTo.Everyone)]
     void StartCountdownRpc()
     {
+        //deactivate colorSelectInactive GameObject
         colorSelectInactive.SetActive(false);
+        //activate gameCountdown GameObject
         gameCountdown.SetActive(true);
+        //activate the gameCountdownState trigger
         gameCountdownState = true;
     }
 
+    //All entities should activate this function
     [Rpc(SendTo.Everyone)]
     void StartGameRpc()
     {
+        //deactivate gameCountdown GameObject
         gameCountdown.SetActive(false);
+        //activate gameOverlay GameObject
         gameOverlay.SetActive(true);
+        //activate on enter triggers for the floor
         activateFloor();
+        //enable players to move
         enablePlayerMovement();
+        //activate the gameRunningState trigger
         gameRunningState = true;
     }
 
+    //All entities should activate this function
     [Rpc(SendTo.Everyone)]
     void GameEndRpc()
     {
+        //deactivate gameCountdown GameObject
         gameOverlay.SetActive(false);
+        //deactivate on enter triggers for the floor
         deactivateFloor();
+        //disable players to move
         DisablePlayerMovement();
     }
 
+    //All entities should activate this function
     [Rpc(SendTo.Everyone)]
     void ResetGameRpc()
     {
+        //deactivate gameCountdown GameObject
         endScrean.SetActive(false);
+        //reset player position
         ResetPlayerPosition();
+        //reset the floor 
         ResetFloor();
+        //reset countdownTimeRemaining
         countdownTimeRemaining = COUNTDOWN_DURATION;
+        //reset timerTimeRemaining
         timerTimeRemaining = TIMER_DURATION;
+        //clear playerScores
         playerScores.Clear();
+        //if this is the host start countdown rpc
         if (networkManager.IsHost)
         {
             Debug.Log($"Starting game");
