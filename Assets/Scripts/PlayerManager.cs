@@ -95,7 +95,8 @@ public class PlayerManager : NetworkBehaviour
         ChangeCollorRpc(color);
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
+    //All entities should activate this function
+    [Rpc(SendTo.Everyone)]
     void ChangeCollorRpc(Color color)
     {
         //Change the color of the player to the given color

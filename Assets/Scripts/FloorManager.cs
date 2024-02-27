@@ -46,6 +46,7 @@ public class FloorManager : NetworkBehaviour
         playerName = "";
     }
 
+    //All entities should activate this function
     [Rpc(SendTo.Everyone)]
     void ColorFloorRpc(Color color, string player)
     {
