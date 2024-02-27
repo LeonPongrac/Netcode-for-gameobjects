@@ -13,14 +13,12 @@ public class MenuManager : MonoBehaviour
     {
         //Debug.Log("Starting as Host");
         //Start host through networkManager
-        networkManager.StartHost();
     }
 
     public void StartClient()
     {
         //Debug.Log("Starting as Client");
         //Start client through networkManager
-        networkManager.StartClient();
     }
 
     public void QuitGame()
