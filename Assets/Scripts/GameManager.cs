@@ -145,7 +145,7 @@ public class GameManager : NetworkBehaviour
 
             if (playerManager != null)
             {
-                playerScores.Add(playerManager.playerName, 0);
+                playerScores.Add(playerManager.GetPlayerName(), 0);
             }
         }
 
@@ -333,7 +333,7 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     void CheckForColorRpc(Color color, ulong ClientId)
     {
-        //activate if the playerColors doesent contain the selected color
+        //activate if the playerColors does not contain the selected color
         if (!playerColors.Contains(color))
         {
             //add the color to the playerColors

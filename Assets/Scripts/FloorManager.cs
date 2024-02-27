@@ -19,7 +19,7 @@ public class FloorManager : NetworkBehaviour
         {
             //Debug.Log("collided with player");
             MeshRenderer playerRenderer = other.GetComponent<MeshRenderer>();
-            string player = other.GetComponent<PlayerManager>().playerName;
+            string player = other.GetComponent<PlayerManager>().GetPlayerName();
 
             //Debug.Log($"Player {player} has the cube");
 
