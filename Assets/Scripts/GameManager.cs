@@ -199,6 +199,32 @@ public class GameManager : NetworkBehaviour
         }
 
         UpdateScoreText();
+        if (networkManager.IsHost)
+        {
+            foreach (GameObject player in players)
+            {
+                PlayerManager playerManager = player.GetComponent<PlayerManager>();
+
+                if (playerManager != null && playerManager.GetPlayerName() == winner)
+                {
+                    player.GetComponent<MeshRenderer>().enabled = false;
+
+                    PlayerChildManager playerChildManager = player.GetComponentInChildren<PlayerChildManager>();
+
+                    if (playerChildManager != null)
+                    {
+                        playerChildManager.AnimationStart();
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Child object not found for the winning player.");
+                    }
+
+                    break;
+                }
+            }
+        }
+        
     }
 
     void UpdateScoreText()
@@ -300,6 +326,19 @@ public class GameManager : NetworkBehaviour
             if (playerManager != null)
             {
                 playerManager.ResetPosition();
+            }
+
+            player.GetComponent<MeshRenderer>().enabled = true;
+
+            PlayerChildManager playerChildManager = player.GetComponentInChildren<PlayerChildManager>();
+
+            if (playerChildManager != null)
+            {
+                playerChildManager.AnimationEnd();
+            }
+            else
+            {
+                Debug.LogWarning("Child object not found for the winning player.");
             }
         }
     }

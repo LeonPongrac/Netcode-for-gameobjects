@@ -99,9 +99,23 @@ public class PlayerManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     void ChangeCollorRpc(Color color)
     {
-        //Change the color of the player to the given color
+        // Change the color of the player's material
         playerMeshRenderer.material.SetColor("_Color", color);
-        //Tell gameManager that the player is ready
+
+        // Find playerChildManager of the child object
+        PlayerChildManager playerChildManager = GetComponentInChildren<PlayerChildManager>();
+
+        // Set the color of the child object
+        if (playerChildManager != null)
+        {
+            playerChildManager.SetColor(color);
+        }
+        else
+        {
+            Debug.LogWarning("playerChildManager not found");
+        }
+
+        // Tell the game manager that the player is ready
         gameManager.playerReady();
     }
 
