@@ -47,12 +47,10 @@ public class FloorManager : NetworkBehaviour
     }
 
     //All entities should activate this function
-    [Rpc(SendTo.Everyone)]
+    [Rpc()]
     void ColorFloorRpc(Color color, string player)
     {
         //Set the color of floor to the color of the player
-        floorRenderer.material.color = color;
         //Set the playerName to the player that touched the floor
-        playerName = player;
     }
 }

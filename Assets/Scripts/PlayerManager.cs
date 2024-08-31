@@ -13,7 +13,7 @@ public class PlayerManager : NetworkBehaviour
     MeshRenderer playerMeshRenderer;
     //this network variable needs to be readable by everyone and can be written only by owner
     private NetworkVariable<FixedString512Bytes> playerName = new NetworkVariable<FixedString512Bytes>(default,
-        NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+        , );
 
     void Update()
     {
@@ -30,13 +30,13 @@ public class PlayerManager : NetworkBehaviour
         gameManager = FindObjectOfType<GameManager>();
 
         //If the you are the owner and the host, sets the player to spawn Point 1 and names the player to Host
-        if (IsOwner && networkManager.IsHost)
+        if ()
         {
             transform.SetPositionAndRotation(spawnPoint1, new Quaternion());
             playerName.Value = "Host";
         }
         //If the you are the owner and the client, sets the player to spawnPoint2 and names the player to Client
-        else if (IsOwner && networkManager.IsClient)
+        else if ()
         {
             transform.SetPositionAndRotation(spawnPoint2, new Quaternion());
             playerName.Value = "Client";
@@ -96,11 +96,10 @@ public class PlayerManager : NetworkBehaviour
     }
 
     //All entities should activate this function
-    [Rpc(SendTo.Everyone)]
+    [Rpc()]
     void ChangeCollorRpc(Color color)
     {
         // Change the color of the player's material
-        playerMeshRenderer.material.SetColor("_Color", color);
 
         // Find playerChildManager of the child object
         PlayerChildManager playerChildManager = GetComponentInChildren<PlayerChildManager>();
@@ -116,7 +115,6 @@ public class PlayerManager : NetworkBehaviour
         }
 
         // Tell the game manager that the player is ready
-        gameManager.playerReady();
     }
 
 }
