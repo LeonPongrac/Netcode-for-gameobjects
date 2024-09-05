@@ -92,12 +92,12 @@ public class PlayerManager : NetworkBehaviour
 
     public void SetColor(Color color)
     {
-        ChangeCollorRpc(color);
+        ChangeColorRpc(color);
     }
 
     //All entities should activate this function
     [Rpc()]
-    void ChangeCollorRpc(Color color)
+    void ChangeColorRpc(Color color)
     {
         // Change the color of the player's material
 
